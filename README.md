@@ -16,27 +16,40 @@ Currently there is no build and this builds on a few layers, promises and a mess
 That means for now, you have to include the following in your page...
 
 ```html
-<!-- Place this in the head of your document --> 
+<!-- 
+    Place this dependency in the head of your document manually for now... 
+    Because I have no build... 
+-->
 <script type="application/javascript" src="http://bkardell.github.io/test-repo/MessageClientRelay.js"></script>
-<script type="application/javascript" src="http://bkardell.github.io/test-repo/tap.js"></script>
+
 ```
 
-And then you can begin using a repository... The easiest way is mark scripts you want to load from the repo:
+Declaratively let your page know that you are using a repo via a meta tag:
 ```html
-<!-- Place these in the head as you would any other -->
+<meta name="tap-repository" content="hhttp://bkardell.github.io/test-repo/repository.html">
+```    
+
+Declaratively let your page know which files should be loaded from said repository:
+```html
+<!-- in the head, as per normal -->
 <script data-tap-get="hitch-0.6.3-min.js"></script>
 <script data-tap-get="jquery-1.10.2.min.js"></script>
 ```    
 
-And then wire up and scan... 
+Include tap...
 ```html
-<!-- This also can go in the head... -->
-<script type="application/javascript">			
-	tap.setRepo("http://localhost/~bkardell/tap/serverRelay.html");
-	tap.scan(function(){
-        console.log('All my files loaded... Anyone using this repo shouldnt have to fetch again...');
-		console.log("hitch: " + Hitch);
-		console.log("JQuery: " + $);
-});
+<!-- This has to go *after* your tags above... -->
+<script type="application/javascript" src="http://bkardell.github.io/test-repo/tap.js"></script>
+```
+
+Wanna know when scripts are ready?
+```html
+<script>
+	tap.ready(function(){
+		document.getElementById("test").value = 
+			"All my files loaded... Anyone using this repo shouldnt have to fetch again..."
+			"\nhitch: " + Hitch
+			"\nJQuery: " + $;
+	});
 </script>
 ```

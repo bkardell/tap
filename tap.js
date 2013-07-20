@@ -1,6 +1,7 @@
 var tap = (function(){
+	var isReady, readyCbs = [];
 	var head = document.head || document.getElementsByTagName('head')[0];
-	var client;	
+	var clients = {};	
 	var injectScript = function( text ) {
 		var script = document.createElement('script');
 		//script.defer = true;
@@ -9,25 +10,50 @@ var tap = (function(){
 		script.text = text;
 		head.appendChild( script );
 	};
+	var toArray = function(nodelist){
+		return Array.prototype.slice.call(nodelist, 0);
+	};
 	return {
-		setRepo: function(url){
-			client = new XDomainMessageClient(url);
+		setRepo: function (id, url) {
+			clients[id] = new XDomainMessageClient(url);
 		}, 
-		get: function(o){
-			return client.request(o).then(function(x){
+		init: function () {
+			var toGet = [];
+			var clients = toArray(head.querySelectorAll("meta[name='tap-repository']"));
+			var stuff = toArray(head.querySelectorAll("[data-tap-get]"));
+			
+			clients.forEach(function (el) {
+				var id = el.getAttribute("data-id") || "default";
+				tap.setRepo(id, el.getAttribute("content"));
+			});
+			stuff.forEach(function(el){
+				toGet.push({ "url": el.getAttribute("data-tap-get") });
+			});
+			this.get(toGet).then(function () {
+				isReady = true;
+				readyCbs.forEach(function (callback) {
+					callback();
+				});
+			});
+		}, 
+		get: function (clientId, o) {
+			var id = (arguments.length>1) ? clientId : "default";
+			var req = (arguments.length>1) ? o : arguments[0];
+			client = clients[id];
+			return client.request(req).then(function (x) {
 				x = x[0];
 				for (var i=0;i<x.length;i++) {
 					injectScript(x[i]);
 				}
 			});		
 		}, 
-		scan: function(cb){
-			var toGet = [];
-			var stuff = Array.prototype.slice.call(document.querySelectorAll('[data-tap-get]'), 0);
-			stuff.forEach(function(el){
-				toGet.push({ "url": el.getAttribute('data-tap-get') });
-			});
-			this.get(toGet).then(cb);
+		ready: function (cb) {
+			if (isReady) { 
+				cb(); 
+			} else {
+				readyCbs.push(cb);	
+			}
 		}
 	}		
 }());
+tap.init();
