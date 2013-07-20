@@ -5,6 +5,9 @@ A crazy POC of something like APT using x-domain local storage against a univera
 
 In other words, we can create a repository in a given domain and then use localStorage in that domain to create a better/faster cache that is less likely to miss and use it from whatever domain we like.  It could heavy handedly initialize (download) some things, but for now it is fetched if not present the first time and then persisted.
 
+
+You can view the lamest demo ever at http://bkardell.github.io/test-repo/index.html
+
 Usage
 ======
 
@@ -23,7 +26,7 @@ And then you can begin using a repository... The easiest way is mark scripts you
 <!-- Place these in the head as you would any other -->
 <script data-tap-get="hitch-0.6.3-min.js"></script>
 <script data-tap-get="jquery-1.10.2.min.js"></script>
-```	
+```    
 
 And then wire up and scan... 
 ```html
