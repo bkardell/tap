@@ -18,9 +18,16 @@ That means for now, you have to include the following in your page...
 <script type="application/javascript" src="http://bkardell.github.io/test-repo/tap.js"></script>
 ```
 
-And then you can begin using a repository... The easiest way is to do:
-
+And then you can begin using a repository... The easiest way is mark scripts you want to load from the repo:
 ```html
+<!-- Place these in the head as you would any other -->
+<script data-tap-get="hitch-0.6.3-min.js"></script>
+<script data-tap-get="jquery-1.10.2.min.js"></script>
+```	
+
+And then wire up and scan... 
+```html
+<!-- This also can go in the head... -->
 <script type="application/javascript">			
 	tap.setRepo("http://localhost/~bkardell/tap/serverRelay.html");
 	tap.scan(function(){

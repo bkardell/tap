@@ -1,3 +1,24 @@
-TEST
-II
-What the heck??
+<!DOCTYPE html>
+<html>
+  <head>
+	<script type="application/javascript" src="http://bkardell.github.io/test-repo/MessageClientRelay.js"></script>
+	<script type="application/javascript" src="http://bkardell.github.io/test-repo/tap.js"></script>
+	<script data-tap-get="hitch-0.6.3-min.js"></script>
+	<script data-tap-get="jquery-1.10.2.min.js"></script>
+	
+	<script type="application/javascript">			
+		tap.setRepo("http://bkardell.github.io/test-repo/serverRelay.html");
+		tap.scan(function(){
+			document.getElementsById("test").innerHTML = 
+			  "All my files loaded... Anyone using this repo shouldnt have to fetch again..."
+			  "\nhitch: " + Hitch
+			  "\nJQuery: " + $;
+		});
+	</script>
+
+  </head>
+  <body>
+	<textarea id="test">Fetching...</textarea>
+
+  </body>
+</html>
