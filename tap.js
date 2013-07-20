@@ -14,10 +14,10 @@ var tap = (function(){
 			client = new XDomainMessageClient(url);
 		}, 
 		get: function(o){
-			return client.request(o).then(function(){
-				// inject each...
-				for (var i=0;i<arguments.length;i++) {
-					injectScript(arguments[i]);
+			return client.request(o).then(function(x){
+				x = x[0];
+				for (var i=0;i<x.length;i++) {
+					injectScript(x[i]);
 				}
 			});		
 		}
