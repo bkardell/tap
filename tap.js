@@ -14,9 +14,9 @@ var tap = (function(){
 			client = new XDomainMessageClient(url);
 		}, 
 		get: function(o){
-			return client.request(o).then(function(data){
-				for (var i=0;i<data.length;i++) {
-					injectScript(data[i]);
+			return client.request(o).then(function(){
+				for (var i=0;i<arguments.length;i++) {
+					injectScript(arguments[i]);
 				}
 			});		
 		}
