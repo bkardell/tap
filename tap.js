@@ -15,6 +15,7 @@ var tap = (function(){
 		}, 
 		get: function(o){
 			return client.request(o).then(function(){
+				// inject each...
 				for (var i=0;i<arguments.length;i++) {
 					injectScript(arguments[i]);
 				}
