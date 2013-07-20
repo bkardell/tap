@@ -20,6 +20,14 @@ var tap = (function(){
 					injectScript(x[i]);
 				}
 			});		
+		}, 
+		scan: function(cb){
+			var toGet = [];
+			var stuff = Array.prototype.slice.call(document.querySelectorAll('[data-tap-get]'), 0);
+			stuff.forEach(function(el){
+				toGet.push({ "url": el.getAttribute('data-tap-get') });
+			});
+			this.get(toGet).then(cb);
 		}
 	}		
 }());
