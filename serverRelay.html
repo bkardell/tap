@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<script type="application/javascript" src="MessageClientRelay.js"></script>
+	<script type="application/javascript" src="basket.js"></script>
+  	<script type="text/javascript">
+
+  	XDomainMessageServer.receive(function(event, res){
+  		var promise;
+  		for(var i=0;i<event.data.length;i++){
+  			event.data[i].execute = false;
+        event.data[i].url = "libs/" + url;
+  		}
+  		basket.require.apply(this, event.data).then(function (c) {
+  			res.send.apply(this, c);
+  		});
+  	
+  	});
+	
+
+  	</script> 
+  </head> 
+  <body>
+  </body>
+</html>
