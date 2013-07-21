@@ -2,6 +2,32 @@
 <html>
   <head>
     <<content>>
+
+    <script>
+      var lazy = <<lazy>>;
+      
+     function lazyLoad(){
+        var next = lazy.shift();
+        if (next) {
+          if(basket.get(next)){
+            lazyLoad();
+          } else {
+            setTimeout(
+              function () {
+                basket.require({"url": next, execute: false}).then(function() {
+                  lazyLoad();
+                });
+              },
+              15000
+            )
+        }
+        } else {
+          // console.log("repo all loaded...");
+        }
+      }
+
+      lazyLoad();
+  </script>
   </head> 
   <body>
   </body>

@@ -11,10 +11,21 @@ var source = [
 
 var templ = fs.readFileSync('repository-template.html', 'utf8');
 
+var libs = fs.readdirSync("libs");
+var preload = [];
+for(var i=0; i<libs.length;i++){
+	if(libs[i].charAt(0) !== '.'){
+		preload.push(libs[i]);
+	}
+}
+
+templ = templ.replace("<<lazy>>", JSON.stringify(preload));
+
 fs.writeFileSync(
 	'repository.html', 
 	templ.replace("<<content>>", source.join("\n\n"))
 );
+
 
 
 source = [
@@ -28,3 +39,5 @@ fs.writeFileSync(
 	source.join("\n\n")
 );
 
+
+console.log("all set...");

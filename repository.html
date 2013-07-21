@@ -348,6 +348,32 @@ XDomainMessageServer.receive(function(event, res){
 
 
 </script>
+
+    <script>
+      var lazy = ["ember-1.0.0-rc.6.min.js","hitch-0.6.3-min.js","jquery-1.10.2.min.js","jquery-1.10.2.min.map"];
+      
+     function lazyLoad(){
+        var next = lazy.shift();
+        if (next) {
+          if(basket.get(next)){
+            lazyLoad();
+          } else {
+            setTimeout(
+              function () {
+                basket.require({"url": next, execute: false}).then(function() {
+                  lazyLoad();
+                });
+              },
+              15000
+            )
+        }
+        } else {
+          // console.log("repo all loaded...");
+        }
+      }
+
+      lazyLoad();
+  </script>
   </head> 
   <body>
   </body>
