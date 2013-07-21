@@ -15,3 +15,15 @@ fs.writeFileSync(
 	'repository.html', 
 	templ.replace("<<content>>", source.join("\n\n"))
 );
+
+
+source = [
+  	fs.readFileSync('rsvp.js', 'utf8'), 
+	fs.readFileSync('MessageClientRelay.js', 'utf8'), 
+	fs.readFileSync('tap.js', 'utf8')
+];
+
+fs.writeFileSync(
+	"dist/tap.js"
+);
+
