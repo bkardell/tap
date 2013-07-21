@@ -1,5 +1,6 @@
 var fs = require("fs");
-
+var lazySpeed = 15000;
+var temp;
 var source = [
     "<script type=\"application/javascript\">",
 	fs.readFileSync("rsvp.js", "utf8"), 
@@ -22,7 +23,12 @@ if (process.argv.length>2 && process.argv[2] === "lazy") {
 	}
 }
 
-templ = templ.replace("<<lazy>>", JSON.stringify(preload));
+if (process.argv.length>3) {
+	temp = parseInt(process.argv[3],10);
+	lazySpeed = (isNaN(temp)) ? lazySpeed : temp;
+}
+
+templ = templ.replace("<<lazy>>", JSON.stringify(preload)).replace("<<speed>>", lazySpeed);
 
 fs.writeFileSync(
 	"repository.html", 
