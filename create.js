@@ -14,7 +14,7 @@ var templ = fs.readFileSync('repository-template.html', 'utf8');
 var libs = fs.readdirSync("libs");
 var preload = [];
 for(var i=0; i<libs.length;i++){
-	if(libs[i].charAt(0) !== '.'){
+	if(libs[i].charAt(0) !== '.' && /\.js$/.test(libs[i])){
 		preload.push("libs/" + libs[i]);
 	}
 }
