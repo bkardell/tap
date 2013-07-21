@@ -21,14 +21,14 @@ It loads up an iframe to a **repository** - just an html compiled with JavaScrip
 
 Repos can be populated as requested and can lazily prime common libraries to further decrease the likelihood a download will ever be made. 
 
-You can view maybe the lamest demo ever at http://bkardell.github.io/test-repo/index.html
+You can view maybe the lamest demo ever at http://bkardell.github.io/tap/index.html
 
 Client Usage
 ======
 
 Declaratively let your page know that you are using a repo via a meta tag:
 ```html
-<meta name="tap-repository" content="hhttp://bkardell.github.io/test-repo/repository.html">
+<meta name="tap-repository" content="hhttp://bkardell.github.io/tap/repository.html">
 ```    
 
 ...and which files should be loaded from said repository:
@@ -41,7 +41,7 @@ Declaratively let your page know that you are using a repo via a meta tag:
 Include tap...
 ```html
 <!-- This has to go *after* your tags above... -->
-<script type="application/javascript" src="http://bkardell.github.io/test-repo/dist/tap.js"></script>
+<script type="application/javascript" src="http://bkardell.github.io/tap/dist/tap.js"></script>
 ```
 
 Wanna know when scripts are ready?
@@ -60,7 +60,7 @@ Wanna know when scripts are ready?
 
 Can I create a Repo?
 =======
-Duh.  Of course.  Pull down http://bkardell.github.io/test-repo, place some files in the **/libs** folder.  Then run one of the following..
+Duh.  Of course.  Pull down http://bkardell.github.io/tap, place some files in the **/libs** folder.  Then run one of the following..
 
 ```javascript
 // creates a repository which loads files from your /libs folder on demand...
