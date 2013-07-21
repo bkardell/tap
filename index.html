@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
-  <head>
-
-  	<!-- Let the world know about a repository ... -->
+<html><head>
+	<meta charset="utf-8">
+	<title>tap.js - A simple (proof-of-concept) script loader using x-domain localStorage: APT-repository-style.</title>
+	<link rel="stylesheet" href="css/base.css">
+		<!-- Let the world know about a repository ... -->
   	<meta name="tap-repository" content="http://bkardell.github.io/tap/repository.html">
 
 	<!-- What do you want to load out of the repository? --> 
@@ -10,7 +11,7 @@
 	<script data-tap-get="jquery-1.10.2.min.js"></script>
 
 	<!-- Include tap ... -->
-	<script type="application/javascript" src="http://bkardell.github.io/tap/dist/tap.js"></script>
+	<script type="application/javascript" src="dist/tap.js"></script>
 	
 
 	<!-- Wanna know when scripts are ready? -->
@@ -22,12 +23,137 @@
 			  "\nJQuery: " + $;
 		});
 	</script>
+	</head>
+	<body data-twttr-rendered="true">
+		<div id="container">
+			<h1><img src="images/200px-Crystal_Clear_filesystem_pipe.svg.png" align="left" alt="tap.js logo"> tap.js
+</h1>
+<h2>A simple (proof-of-concept) script loader using x-domain localStorage: APT-repository-style.</h2>
 
-  </head>
-  <body>
-  	See <a href="https://github.com/bkardell/tap/blob/gh-pages/README.md">README</a>
-  	<hr />
-	<textarea rows="5" cols="30" id="test">Fetching...</textarea>
+<p>
+	<strong>Version 0.1.0: </strong>
+	<a href="dist/tap-0.1.0.js">tap.js</a> (4.9KB gzipped) &nbsp;
+	<a href="dist/tap-0.1.0-min.js">tap.min.js</a> (2.1KB gzipped)
+</p>
 
-  </body>
-</html>
+
+			<div class="content">
+				<h3>Introduction</h3>
+
+  <p>tap.js is a small (crazy proof-of-concept) JavaScript library which loads/stores script into special universal cross-domain "repositories" thereby allowing us to mark "special" scripts and not just place them on a CDN, but store them in a special place,  "closer to the metal", avoid HTTP requests for them altogether, and prevent them from being easily wiped out as they are in common caches.</p>
+
+  <p style="margin: 1em 30%;"><textarea rows="5" cols="30" id="test">Fetching...</textarea></p>
+
+
+
+  
+<h3>How is this related to basket.js?</h3>
+
+<p>Great question, I'm glad you asked.  Actually, it extends Addy Osmani's <a href="https://github.com/addyosmani/basket.js">basket.js</a> (which was in turn created as a response to a tweeted suggestion by Steve Souders).  They have a cool and informative site - if the localStorage bit seems unusual, give it a read.</p>
+
+
+
+
+
+<h3>How does it work?</h3>
+
+
+<p>Your client loads <strong>tap.js</strong> - it's fairly small, do it however you like.  </p>
+
+<p>It loads up an iframe to a <strong>repository</strong> - just an html compiled with JavaScript inline (with decent cache advice, this should be less than the cost of a normal script include for any one library). It builds on a few layers, promises and a message client relay to allow simpler communication sugar through postmessage/message channel which is in turn build on promises (via <strong>RSVP</strong>) and all of this uses <strong>basket.js</strong> as a special <strong>localStorage</strong> based cache which is not subject to the same frequent expulsions and misses as standard browser cache.  </p>
+
+<p><strong>Once populated, no website using that repo should have to ask for it again</strong>.</p>
+
+<p>Repos can be populated as requested and can lazily prime common libraries to further decrease the likelihood a download will ever be made. </p>
+
+
+
+
+
+
+
+<h3>Compatibility</h3>
+
+<p>We support browsers which support basket.js.  basket.js supports locally caching scripts in any browser with <a href="http://caniuse.com/#search=localstorage">localStorage capabilities</a>.</p>
+
+<hr>
+<h2>Client Usage</h2>
+
+
+
+
+<p>Declaratively let your page know that you are using a repo via a meta tag:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"tap-repository"</span> <span class="na">content=</span><span class="s">"http://bkardell.github.io/tap/repository.html"</span><span class="nt">&gt;</span>
+</pre></div>
+
+<p>...and which files should be loaded from said repository:</p>
+
+<div class="highlight"><pre><span class="c">&lt;!-- in the head, as per normal --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">data-tap-get=</span><span class="s">"hitch-0.6.3-min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">data-tap-get=</span><span class="s">"jquery-1.10.2.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>Include <strong>tap.js</strong> ...</p>
+
+<div class="highlight"><pre><span class="c">&lt;!-- This has to go *after* your tags above... --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"application/javascript"</span> <span class="na">src=</span><span class="s">"http://bkardell.github.io/tap/dist/tap.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>Wanna know when scripts are ready?</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script&gt;</span>
+    <span class="nx">tap</span><span class="p">.</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"test"</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span> 
+            <span class="s2">"All my files loaded... Anyone using this repo shouldnt have to fetch again..."</span>
+            <span class="s2">"\nhitch: "</span> <span class="o">+</span> <span class="nx">Hitch</span>
+            <span class="s2">"\nJQuery: "</span> <span class="o">+</span> <span class="nx">$</span><span class="p">;</span>
+    <span class="p">});</span>
+<span class="nt">&lt;/script&gt;</span>
+</pre></div>
+
+<p>.... <strong>That's it.</strong> </p>
+
+
+
+<p>To free space basket.js will only remove cached scripts that it placed in localStorage itself. The data stored by other code in same origin will not be touched.</p>
+
+<h2>Can I create a Repo?</h2>
+
+
+<p>Duh.  Of course.  Pull down <a href="http://bkardell.github.io/tap">http://bkardell.github.io/tap</a>, place some files in the <strong>/libs</strong> folder.  Then run one of the following..</p>
+
+<div class="highlight"><pre><span class="c1">// creates a repository which loads files from your /libs folder on demand...</span>
+<span class="nx">node</span> <span class="nx">create</span>
+
+<span class="c1">// make it lazily loads things that aren't already stored/requested (1 file every 15 seconds)...</span>
+<span class="nx">node</span> <span class="nx">create</span> <span class="nx">lazy</span>
+
+<span class="c1">// tweak the lazy timing in ms (1 file every minute).</span>
+<span class="nx">node</span> <span class="nx">create</span> <span class="nx">lazy</span> <span class="mi">60000</span>
+</pre></div>
+
+<p>If you ever add files to your repo, just re-run the create script.</p>
+
+<p>Upload <strong>repository.html</strong> and <strong>/libs</strong> somewhere.</p>
+
+<p>.... <strong>That's it.</strong> </p>
+
+
+
+<hr>
+
+<h3>Team, License &amp; Contribution Guide</h3>
+
+<p>tap.js is released under an <a href="http://en.wikipedia.org/wiki/MIT_License">MIT License</a> and is currently maintained by <a href="https://github.com/bkardell">Brian Kardell</a>, <a href="https://github.com/yoavweiss">Yoav Weiss</a>, <a href="https://github.com/clintjhill">Clint Hill</a>. We would also like to extend our thanks to <a href="https://github.com/addyosmani">Addy Osmani</a> for creating bucket.js and encouraging us to share our extension of it.</p>
+
+
+
+			</div>
+		</div>
+		
+		
+		<a href="http://github.com/bkardell/tap"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+	
+
+</body></html>
