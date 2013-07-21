@@ -24,6 +24,7 @@ source = [
 ];
 
 fs.writeFileSync(
-	"dist/tap.js"
+	"dist/tap.js", 
+	source.join("\n\n")
 );
 
