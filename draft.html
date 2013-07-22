@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Repostitory Script Stores</title>
+    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
+    <!-- 
+      === NOTA BENE ===
+      For the three scripts below, if your spec resides on dev.w3 you can check them
+      out in the same tree and use relative links so that they'll work offline,
+     -->
+    <script src='http://dev.w3.org/2009/dap/ReSpec.js/js/respec.js' class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {
+          // specification status (e.g. WD, LCWD, NOTE, etc.). If in doubt use ED.
+          specStatus:           "unofficial",
+          
+          // the specification's short name, as in http://www.w3.org/TR/short-name/
+          shortName:            "xxx-xxx",
+
+          // if your specification has a subtitle that goes below the main
+          // formal title, define it here
+          // subtitle   :  "an excellent document",
+
+          // if you wish the publication date to be other than today, set this
+          // publishDate:  "2009-08-06",
+
+          // if the specification's copyright date is a range of years, specify
+          // the start date here:
+          // copyrightStart: "2005"
+
+          // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+          // and its maturity status
+          // previousPublishDate:  "1977-03-15",
+          // previousMaturity:  "WD",
+
+          // if there a publicly available Editor's Draft, this is the link
+          edDraftURI:           "http://dev.w3.org/2009/dap/ReSpec.js/documentation.html",
+
+          // if this is a LCWD, uncomment and set the end of its review period
+          // lcEnd: "2009-08-05",
+
+          // if you want to have extra CSS, append them to this list
+          // it is recommended that the respec.css stylesheet be kept
+          extraCSS:             ["http://dev.w3.org/2009/dap/ReSpec.js/css/respec.css"],
+
+          // editors, add as many as you like
+          // only "name" is required
+          editors:  [
+              { name: "Brian Kardell", url: "http://hitchjs.com/",
+                company: "HitchJS", companyURL: "http://hitchjs.com/" },
+              { name: "Yoav Weiss", url: "",
+                company: "", companyURL: "" },
+              { name: "Clint Hill", url: "",
+                company: "", companyURL: "" }
+          ],
+
+          // authors, add as many as you like. 
+          // This is optional, uncomment if you have authors as well as editors.
+          // only "name" is required. Same format as editors.
+
+          //authors:  [
+          //    { name: "Your Name", url: "http://example.org/",
+          //      company: "Your Company", companyURL: "http://example.com/" },
+          //],
+          
+          // name of the WG
+          wg:           "In Charge Of This Document Working Group",
+          
+          // URI of the public WG page
+          wgURI:        "http://example.org/really-cool-wg",
+          
+          // name (without the @w3c.org) of the public mailing to which comments are due
+          wgPublicList: "spec-writers-anonymous",
+          
+          // URI of the patent status for this WG, for Rec-track documents
+          // !!!! IMPORTANT !!!!
+          // This is important for Rec-track documents, do not copy a patent URI from a random
+          // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+          // Team Contact.
+          wgPatentURI:  "",
+      };
+    </script>
+  </head>
+  <body>
+    <section id='abstract'>
+      In a sense the traditional pattern of cache advice is a little like asking "who wants free money?"  Who wouldnt raise their hand?  However, cache headers are merely suggestions from the server.  It is ultimately managed the whim of the browser whose increasingly incredibly difficult job it is to manage it all.
+    </p>
+    <p>
+    	In order to manage this, browsers allocate some maximum storage size for total Web Cache.  Each unique domain, in turn, is allocated some maximum storage size it may consume in that. In the "free money" example above, money is quickly allocated by the browser bank which then prompty confiscates some of it right back to hand it to someone else.  It is incredibly hard to manage algorythmically and browsers to a great job of it in general.  However, when authoring a site, it is a fairly complex problem since you cannot make any guarantees about how much will or won't be in memory.  Something that loads up in less than a second with a fully primed cache could take a minute to load if the misses are high.
+    </p>
+    <p>
+    	One proposed solution to this problem has been CDNs.  The promise of a CDN is that you accomplish a few things: 1) offloading a small amount of traffic off your own network 2) requests are fulfilled regionally, requiring less hops - and - most importantly, to provide a single sharable source of truth which should be touched frequently and therefore increasingly in the browser's cache so that no request is ever made.  Another significant benefit to the CDN strategy is that, as a sharable resource, pointing to it is something in the author's control - this is important as not all Web authors have the skills or permissions to configure server cache advice.
+    </p>
+    <p>
+    	Still, however, things are kind of a mess.  There are so many sources of truth for the same file, so many things attempting to cache and so many things going on that a surprising number of requests to CDNs result in cache misses.
+    </p>
+    <p>
+    	Some things really are a special case that deserve special attention:  Increasingly the Web requires more imperative script, as we Extend the Web Forward, this will continue to increase.
+    	As we layer things atop one another, there are only two choices: 1) a pre-build which <em>redelivers those shared modules in a single request</em> or <em>deal with dependency management at runtime</em>.  The later is particularly slow and unattractive.
+    </p>
+    <p>
+    	This proposal lays out an idea for a special kind of store, "closer to the metal" with less of the problems that the current model creates.  It aims to make performance and management considerably easier.
+    </p>
+    </section>
+    
+    <section>
+      <h2>Definitions</h2>
+      <p>
+        A <strong>Script Store</strong> is a persistent data store (a reposotitory) that lives on a user's machine, outside of traditional cache and exposes a context through with which any page (which we will refer to as a <strong>Script Store Client</strong>) can communicate with it via async message passing regarding scripts.
+      </p>
+      <p>
+      	A <strong>Script Store Client</strong> page itself <em>uses</em> one or more stores as a client by means of either declarative or imperative interfaces.
+      </p>
+      <p>
+      	We introduce the concept of a <strong>Default Script Store</strong> which could potentialy be provided natively by browsers vendors themselves, as well as <strong>Named Script Stores</strong>.
+      </p>
+      <p>
+      	<strong>Script Stores</strong> are backed by a page themselves defining how they work.  Stores may pre-emptively load script resources from remote locations to prime.  Stores may manage their storage in some caching terms in the event that they are full, but as a separate and dedicated entity, this is much easier to manage.
+      </p>
+    </section>
+    
+    <section>
+      <h2>Declarative Importing of Script Stores</h2>
+      <p>
+        A <strong>Script Store</strong> is a persistent data store (a reposotitory) that lives on a user's machine, outside of traditional cache and communicates with pages via async message passing regarding scripts. 
+      </p>
+
+      <p>
+      	The prototypal, default store has no name and can be imported as... 
+	  <pre class="example">
+&lt;!-- import the default script store --&gt;
+&lt;link rel="import" type="application/script-store"&gt; 
+	  </pre>
+      </p>
+
+      <p>
+      	You can also use named script stores (and default is a valid name which would override the default).  If the default script store is present, this store extends that one (meaning that the named store will not store things that already exist in the default store)....
+	  	<pre class="example">
+&lt;!-- import a named script store, url backed --&gt;
+&lt;link rel="import" 
+      type="application/script-store"&gt; 
+      id="myOrgsScriptStore"
+      href="http://bkardell.github.io/tap/repository.html"&gt; 
+  		</pre>
+     </p>
+
+     <p>
+        And named script stores can extend other named stores...
+        <pre class="example">
+ &lt;!-- import a named script store, extending another --&gt;
+&lt;link rel="import" 
+      type="application/script-store"&gt; 
+      id="myFriendsScriptStore"
+      href="http://wycats.github.io/tap/repository.html"&gt; 
+
+	  </pre>
+	</section>
+    <section>
+      <h2>Declarative Use of Scripts from Stores</h2>
+
+      <p>
+      	You can ask that a script be loaded from the default <strong>Script Store</strong> by providing a package and version.  Leaving off the version could get you the latest one.
+      	Store requests are automatically async.
+      
+	    <pre class="example">
+&lt;script package="jquery" version="1.10.2"&gt;&lt;/script&gt; 
+	    </pre>
+      </p>
+      <p>
+      	Or you can ask that a script be loaded from a named store or its prototypes...
+	    <pre class="example">	
+&lt;script package="jquery" version="1.10.2" from="myFriendsScriptStore"&gt;&lt;/script&gt; 
+	    </pre>
+	   </p>
+      <p>
+      	A page can ask that a script be pre-loaded but not executed until referenced later...
+	    <pre class="example">	
+&lt;script package="something" preload version="1.0.0" from="myScriptStore"&gt;&lt;/script&gt; 
+	    </pre>
+	   </p>
+	   <p>
+      	And scripts can express dependencies based on ids....
+	    <pre class="example">	
+&lt;script package="jquery" id="base" version="1.10.2" from="myScriptStore"&gt;&lt;/script&gt; 
+&lt;script dependencies="base"&gt;
+    $.ready(function(){
+        ....
+    });
+&lt;/script&gt;
+
+	    </pre>
+	   </p>
+
+    </section>
+
+
+    <section>
+      <h2>Imperative Use of Scripts from Stores</h2>
+
+      <p>
+      	You can ask that scripts be loaded from the default <strong>Script Store</strong> by providing a package and version, it is async using Promises. 
+      
+	    <pre class="example">
+ScriptStores.get("default", {package: "jquery", version: "1.10.2"}).then(function(){
+    // jquery is all loaded..
+});
+        </pre>
+      </p>
+
+      <p>
+        You can check if a script exists in a store, again, async
+      
+      <pre class="example">
+ScriptStores.has("default", {package: "jquery", version: "1.10.2"}).then(function(result){
+    // result is true or false... do something
+});
+        </pre>
+      </p>
+    </section>
+
+
+    <section>
+      <h2>Creating a Script Stores</h2>
+
+      <p>
+        Any page can act as a script store by advertising what they contain and who they are willing to service
+      
+      <pre class="example">
+var offerings = [{
+   "package": "jquery"
+   "version": "1.10.2",
+   "url": "libs/jquery-1.10.2.min.js"  
+}];
+
+// Services anyone - standard domain matching ala window.postMessage()
+ScriptStore.service(offerings, "*");
+      </pre>
+    </p>
+    <p>
+      They can also use imperative means to manage the store.
+      For example, pre-populate missing entries every N ms lazily every 15 seconds.
+    </p>
+    <pre class="example">
+function lazyLoad(){
+  var next = offerings.shift();
+  if (next) {
+    if(ScriptStore.has(next)){
+      lazyLoad();
+    } else {
+      setTimeout(
+        function () {
+          ScriptStore.load({"url": next, execute: false}).then(function() {
+            lazyLoad();
+          });
+        },
+        15000
+      )
+  }
+  } else {
+    // console.log("repo all loaded...");
+  }
+}
+
+lazyLoad();
+
+
+        </pre>
+      </p>
+
+    </section>
+    <section class='appendix'>
+      <h2>Acknowledgements</h2>
+      <p>
+        Many thanks to Robin Berjon for making our lives so much easier with his cool tool.
+      </p>
+    </section>
+  </body>
+</html>
