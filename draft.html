@@ -52,7 +52,8 @@
               { name: "Yoav Weiss", url: "",
                 company: "", companyURL: "" },
               { name: "Clint Hill", url: "",
-                company: "", companyURL: "" }
+                company: "", companyURL: "" },
+              { name: "Angelina Fabbro", url: "", company: "Mozilla", companyURL: "http://www.mozilla.com"}
           ],
 
           // authors, add as many as you like. 
@@ -84,16 +85,26 @@
   </head>
   <body>
     <section id='abstract'>
-      In a sense the traditional pattern of cache advice is a little like asking "who wants free money?"  Who wouldnt raise their hand?  However, cache headers are merely suggestions from the server.  It is ultimately managed the whim of the browser whose increasingly incredibly difficult job it is to manage it all.
+    <p>
+      When authoring a site, developers have to deal with the problem of unreliable caching behavior. Cache headers are merely suggestions from the server; cache behavior is ultimately managed by the whim of the browser.</p>
+    <p>
+      This behavior is a little bit like a generous but misguided bank. The bank says to the client, the Web page or application, that they can have as much money as they want, for free. Who wouldn't say no to that? You would assume that the resources dispersed are yours now, reliably, unless you choose to rescind them to the bank.
     </p>
     <p>
-    	In order to manage this, browsers allocate some maximum storage size for total Web Cache.  Each unique domain, in turn, is allocated some maximum storage size it may consume in that. In the "free money" example above, money is quickly allocated by the browser bank which then prompty confiscates some of it right back to hand it to someone else.  It is incredibly hard to manage algorythmically and browsers to a great job of it in general.  However, when authoring a site, it is a fairly complex problem since you cannot make any guarantees about how much will or won't be in memory.  Something that loads up in less than a second with a fully primed cache could take a minute to load if the misses are high.
+    	However, with browsers, this is not the case. Browsers allocate some maximum storage size for total Web Cache.  Each unique domain, in turn, is allocated some maximum storage size it may consume in that. In the "free money" example above with the generous but misguided bank, the money, or rather the resources, are quickly allocated by the browser bank which then promptly confiscates some of it right back to hand it to someone else.</p>
+    <p>
+      It is incredibly hard to manage this problem algorithmically and browsers manage it as well as they can.  Still though, when authoring a site, it is a fairly complex problem for the developer since you cannot make any guarantees about how much will or won't be in memory.  A Web site or application that loads up in less than a second with a fully primed cache could take a minute to load if the misses are high.
+    </p>
+    <p>One proposed solution to this problem has been CDNs.  The promise of a CDN is that you accomplish a few things:</p> 
+      <ol>
+        <li>Offloading a small amount of traffic off your own network<li>
+        <li>Requests are fulfilled regionally, requiring less hops</li>
+      </ol>
+    <p>
+      The second point is very important as it's intention is to provide a single sharable source of truth which should be touched frequently and therefore reinforced in the browser's cache so that no superfluous request is ever made.  Another significant benefit to the CDN strategy is that, as a sharable resource, pointing to it is something in the author's control - this is important as not all Web authors have the skills or permissions to configure server cache advice.
     </p>
     <p>
-    	One proposed solution to this problem has been CDNs.  The promise of a CDN is that you accomplish a few things: 1) offloading a small amount of traffic off your own network 2) requests are fulfilled regionally, requiring less hops - and - most importantly, to provide a single sharable source of truth which should be touched frequently and therefore increasingly in the browser's cache so that no request is ever made.  Another significant benefit to the CDN strategy is that, as a sharable resource, pointing to it is something in the author's control - this is important as not all Web authors have the skills or permissions to configure server cache advice.
-    </p>
-    <p>
-    	Still, however, things are kind of a mess.  There are so many sources of truth for the same file, so many things attempting to cache and so many things going on that a surprising number of requests to CDNs result in cache misses.
+    	This leaves some complexity to be contended with. There are many sources of truth for the same file, many things attempting to cache and so many things going on that a surprising number of requests to CDNs result in cache misses.
     </p>
     <p>
     	Some things really are a special case that deserve special attention:  Increasingly the Web requires more imperative script, as we Extend the Web Forward, this will continue to increase.
