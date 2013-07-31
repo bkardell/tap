@@ -49,7 +49,7 @@
           editors:  [
               { name: "Brian Kardell", url: "http://hitchjs.com/",
                 company: "HitchJS", companyURL: "http://hitchjs.com/" },
-              { name: "Yoav Weiss", url: "",
+              { name: "Yoav Weiss", url: "http://blog.yoav.ws",
                 company: "", companyURL: "" },
               { name: "Clint Hill", url: "",
                 company: "", companyURL: "" },
@@ -86,32 +86,50 @@
   <body>
     <section id='abstract'>
     <p>
-      When authoring a site, developers have to deal with the problem of unreliable caching behavior. Cache headers are merely suggestions from the server; cache behavior is ultimately managed by the whim of the browser.</p>
+      When authoring a site, developers often use script resources that their users most probably already downloaded.
+      Popular frameworks, libraries and polyfills are used across many sites.
+      Yet in many cases, the code for these libraries has to be downloaded over and over for every site the end use goes to.
+      </p>
     <p>
-      This behavior is a little bit like a generous but misguided bank. The bank says to the client, the Web page or application, that they can have as much money as they want, for free. Who wouldn't say no to that? You would assume that the resources dispersed are yours now, reliably, unless you choose to rescind them to the bank.
+      There are multiple reasons for that:
+      <ul>
+          <li>Caches directives do not oblige the browser to cache resources, and it evicts popular resources when disk space becomes limited (YW:
+          I'm not sure this is the case (Need data). If it is, the place to fix this is in caches, not by bypassing them. )</li>
+          <li>Resources are often fetched by different sites from various URLs, making it impossible for browser caches to share them among
+          sites </li>
+      </ul>
     </p>
     <p>
-    	However, with browsers, this is not the case. Browsers allocate some maximum storage size for total Web Cache.  Each unique domain, in turn, is allocated some maximum storage size it may consume in that. In the "free money" example above with the generous but misguided bank, the money, or rather the resources, are quickly allocated by the browser bank which then promptly confiscates some of it right back to hand it to someone else.</p>
-    <p>
-      It is incredibly hard to manage this problem algorithmically and browsers manage it as well as they can.  Still though, when authoring a site, it is a fairly complex problem for the developer since you cannot make any guarantees about how much will or won't be in memory.  A Web site or application that loads up in less than a second with a fully primed cache could take a minute to load if the misses are high.
-    </p>
-    <p>One proposed solution to this problem has been CDNs.  The promise of a CDN is that you accomplish a few things:</p> 
+        If developers could guaranty with high probability that their favorite framework will be cached a usable at the user's cache, it
+        could influence their decision whether to use it or not, since the performance impact of their decision would be entirely different.
+    <p>One traditional solution to this problem has been CDNs.  CDNs help accomplish a few things:</p> 
       <ol>
         <li>Offloading a small amount of traffic off your own network<li>
         <li>Requests are fulfilled regionally, requiring less hops</li>
       </ol>
     <p>
-      The second point is very important as it's intention is to provide a single sharable source of truth which should be touched frequently and therefore reinforced in the browser's cache so that no superfluous request is ever made.  Another significant benefit to the CDN strategy is that, as a sharable resource, pointing to it is something in the author's control - this is important as not all Web authors have the skills or permissions to configure server cache advice.
+      Besides these roles, CDNs in the context of JS frameworks, also help to unify the URL with which popular frameworks are served across
+    sites, enabling keeping them as a single resource in the browser's cache and serving them to multiple sites.
+    With multiple sites accessing this single URL, the browser cache can learn about its popularity and avoid evicting it.
+    CDNs also make sure that the resource cache directives are approporiate - 
+      this is important as not all Web authors have the skills or permissions to configure cache directives on the server.
     </p>
     <p>
-    	This leaves some complexity to be contended with. There are many sources of truth for the same file, many things attempting to cache and so many things going on that a surprising number of requests to CDNs result in cache misses.
+        However, the CDN approach have <a href="http://statichtml.com/2011/google-ajax-libraries-caching.html">failed</a>. Multiple CDNs for
+    the same high-profile frameworks, along with large version number fragmentation have led to very low cross-site code reuse rates.
     </p>
     <p>
-    	Some things really are a special case that deserve special attention:  Increasingly the Web requires more imperative script, as we Extend the Web Forward, this will continue to increase.
-    	As we layer things atop one another, there are only two choices: 1) a pre-build which <em>redelivers those shared modules in a single request</em> or <em>deal with dependency management at runtime</em>.  The later is particularly slow and unattractive.
+        Increasingly the Web requires more imperative script, as we Extend the Web Forward, this will continue to increase.
+        We can also expect the amount of polyfills, used across multiple sites, to increase.
+
+    	As we layer things atop one another, there are only two choices: 
+        1) a pre-build which <em>redelivers those shared modules in a single request</em> or <em>deal with dependency management at runtime</em>.  
+        The later is particularly slow and unattractive.
+        (???YW: I don't understand what you're saying here)
     </p>
     <p>
-    	This proposal lays out an idea for a special kind of store, "closer to the metal" with less of the problems that the current model creates.  It aims to make performance and management considerably easier.
+    	This proposal lays out an idea for a special kind of store, "closer to the metal" with less of the problems that the current model creates.  
+        It aims to make performance and management considerably easier.
     </p>
     </section>
     
