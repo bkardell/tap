@@ -34,9 +34,11 @@ var XDomainMessageClient = (function (window) {
 
 		return allPromise;
 	};
+
+	var messageId = 0;
+	var messages = {};
+	var listening;
 	var XDomainMessageClient = function (url) {
-		var messageId = 0;
-		var messages = {};
 		var ready = [];
 		var i;
 		var relay;
@@ -48,28 +50,50 @@ var XDomainMessageClient = (function (window) {
 			};
 		};
 
+		if(!listening){
+			/* The whole window gets 1 message listener for this... */
+			window.addEventListener("message", function (event) {
+				if (event.data.id) {
+					console.log('received message' + event.data.id + "..." );
+					messages[event.data.id].resolve(event.data.body);
+					delete messages[event.data.id];
+				}
+			}, false);
+			listening = true;
+		}
 		if (!url) {
 			return null;
 		}
 		relay = window.frames[ url ];
-		document.addEventListener("DOMContentLoaded", function (event) {
-			if(!relay){
-				temp = document.createElement('iframe');
-				temp.setAttribute("name",url);
-				temp.src = url;
-				temp = document.body.appendChild(temp);
-				temp.style.display = "none";
-				temp.addEventListener("load", function(event) {
-					self.relay = window.frames[url];
+		if(!relay){
+			temp = document.createElement("iframe");
+			temp.setAttribute("name",url);
+			temp.src = url;
+			temp = document.getElementsByTagName("head")[0].appendChild(temp);
+			temp.style.display = "none";
+			temp.addEventListener("load", function(event) {
+				self.relay = window.frames[url];
+				messageId++;
+				messages[messageId] = new RSVP.Promise();
+				self._list = messages[messageId];
+				getHandler(self,messageId,{"cmd": "ls"}, "*")();
+				messages[messageId].then(function (contents) {
+					self.contents = contents;
 					readyPromise.resolve();
-				}, false);
-			}
- 		 }, false);
-
+				});
+			}, false);
+		}
+		
+		this.readyPromise = readyPromise;
 		
 		this.ready = function(func) {
 			ready.push(func);
 		};
+
+		this.list = function () {
+			return this._list;
+		};
+
 		this.send = function () {
 			var promises = this.request.apply(this, arguments);
 			promises.resolve();
@@ -87,13 +111,8 @@ var XDomainMessageClient = (function (window) {
 			}
 			return RSVP.all( promises );
 		};
-		window.addEventListener("message", function (event) {
-			if (event.data.id) {
-				messages[event.data.id].resolve(event.data.body);
-				delete messages[event.data.id];
-			}
-		}, false);
 	};
+
 	return XDomainMessageClient;
 }(window));
 
@@ -334,47 +353,58 @@ var XDomainMessageServer = (function () {
 		})( this, document );
 
 
-XDomainMessageServer.receive(function(event, res){
-	var promise;
-	for(var i=0;i<event.data.length;i++){
-		event.data[i].execute = false;
-		event.data[i].url = "libs/" + event.data[i].url;
-	}
-	basket.require.apply(this, event.data).then(function () {
-		res.send.apply(this, arguments);
-	});
-
+XDomainMessageServer.receive(function (event, res) {
+    var promise;
+    if (event.data.cmd) {
+        res.send(contents);
+    } else {
+        event.data = (event.data.length) ? event.data : [event.data];
+        for (var i=0;i<event.data.length;i++) {
+            event.data[i].execute = false;
+            event.data[i].url = "libs/" + event.data[i].url;
+        }
+        basket.require.apply(this, event.data).then(function () {
+            res.send.apply(this, arguments);
+        });
+    }
 });
-
 
 </script>
 
     <script>
-      var lazy = ["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"];
-      
-     function lazyLoad(){
-        var next = lazy.shift();
+      var libs = ["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"];
+      var contents = {};
+
+      for(var i=0;i<libs.length;i++){
+        contents[libs[i].replace('libs/','')] = basket.get(libs[i]) !== false;
+      }
+
+      function lazyLoad(){
+        var next = libs.shift();
         if (next) {
           if(basket.get(next)){
             lazyLoad();
           } else {
-            setTimeout(
-              function () {
-                basket.require({"url": next, execute: false}).then(function() {
-                  lazyLoad();
-                });
-              },
-              15000
-            )
-        }
+              console.log("lazy loading from #2" + next);
+              setTimeout(
+                function () {
+                  basket.require({"url": next, execute: false}).then(function() {
+                    lazyLoad();
+                  });
+                },
+                10000
+              )
+          }
         } else {
-          // console.log("repo all loaded...");
+            console.log("repo all loaded...");
         }
       }
 
-      lazyLoad();
+      if (true) {
+        lazyLoad();
+      }
   </script>
-  </head> 
+  </head>
   <body>
   </body>
 </html>

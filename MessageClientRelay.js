@@ -26,9 +26,11 @@ var XDomainMessageClient = (function (window) {
 
 		return allPromise;
 	};
+
+	var messageId = 0;
+	var messages = {};
+	var listening;
 	var XDomainMessageClient = function (url) {
-		var messageId = 0;
-		var messages = {};
 		var ready = [];
 		var i;
 		var relay;
@@ -40,28 +42,50 @@ var XDomainMessageClient = (function (window) {
 			};
 		};
 
+		if(!listening){
+			/* The whole window gets 1 message listener for this... */
+			window.addEventListener("message", function (event) {
+				if (event.data.id) {
+					console.log('received message' + event.data.id + "..." );
+					messages[event.data.id].resolve(event.data.body);
+					delete messages[event.data.id];
+				}
+			}, false);
+			listening = true;
+		}
 		if (!url) {
 			return null;
 		}
 		relay = window.frames[ url ];
-		document.addEventListener("DOMContentLoaded", function (event) {
-			if(!relay){
-				temp = document.createElement('iframe');
-				temp.setAttribute("name",url);
-				temp.src = url;
-				temp = document.body.appendChild(temp);
-				temp.style.display = "none";
-				temp.addEventListener("load", function(event) {
-					self.relay = window.frames[url];
+		if(!relay){
+			temp = document.createElement("iframe");
+			temp.setAttribute("name",url);
+			temp.src = url;
+			temp = document.getElementsByTagName("head")[0].appendChild(temp);
+			temp.style.display = "none";
+			temp.addEventListener("load", function(event) {
+				self.relay = window.frames[url];
+				messageId++;
+				messages[messageId] = new RSVP.Promise();
+				self._list = messages[messageId];
+				getHandler(self,messageId,{"cmd": "ls"}, "*")();
+				messages[messageId].then(function (contents) {
+					self.contents = contents;
 					readyPromise.resolve();
-				}, false);
-			}
- 		 }, false);
-
+				});
+			}, false);
+		}
+		
+		this.readyPromise = readyPromise;
 		
 		this.ready = function(func) {
 			ready.push(func);
 		};
+
+		this.list = function () {
+			return this._list;
+		};
+
 		this.send = function () {
 			var promises = this.request.apply(this, arguments);
 			promises.resolve();
@@ -79,13 +103,8 @@ var XDomainMessageClient = (function (window) {
 			}
 			return RSVP.all( promises );
 		};
-		window.addEventListener("message", function (event) {
-			if (event.data.id) {
-				messages[event.data.id].resolve(event.data.body);
-				delete messages[event.data.id];
-			}
-		}, false);
 	};
+
 	return XDomainMessageClient;
 }(window));
 

@@ -29,9 +29,11 @@ var XDomainMessageClient = (function (window) {
 
 		return allPromise;
 	};
+
+	var messageId = 0;
+	var messages = {};
+	var listening;
 	var XDomainMessageClient = function (url) {
-		var messageId = 0;
-		var messages = {};
 		var ready = [];
 		var i;
 		var relay;
@@ -43,28 +45,50 @@ var XDomainMessageClient = (function (window) {
 			};
 		};
 
+		if(!listening){
+			/* The whole window gets 1 message listener for this... */
+			window.addEventListener("message", function (event) {
+				if (event.data.id) {
+					console.log('received message' + event.data.id + "..." );
+					messages[event.data.id].resolve(event.data.body);
+					delete messages[event.data.id];
+				}
+			}, false);
+			listening = true;
+		}
 		if (!url) {
 			return null;
 		}
 		relay = window.frames[ url ];
-		document.addEventListener("DOMContentLoaded", function (event) {
-			if(!relay){
-				temp = document.createElement('iframe');
-				temp.setAttribute("name",url);
-				temp.src = url;
-				temp = document.body.appendChild(temp);
-				temp.style.display = "none";
-				temp.addEventListener("load", function(event) {
-					self.relay = window.frames[url];
+		if(!relay){
+			temp = document.createElement("iframe");
+			temp.setAttribute("name",url);
+			temp.src = url;
+			temp = document.getElementsByTagName("head")[0].appendChild(temp);
+			temp.style.display = "none";
+			temp.addEventListener("load", function(event) {
+				self.relay = window.frames[url];
+				messageId++;
+				messages[messageId] = new RSVP.Promise();
+				self._list = messages[messageId];
+				getHandler(self,messageId,{"cmd": "ls"}, "*")();
+				messages[messageId].then(function (contents) {
+					self.contents = contents;
 					readyPromise.resolve();
-				}, false);
-			}
- 		 }, false);
-
+				});
+			}, false);
+		}
+		
+		this.readyPromise = readyPromise;
 		
 		this.ready = function(func) {
 			ready.push(func);
 		};
+
+		this.list = function () {
+			return this._list;
+		};
+
 		this.send = function () {
 			var promises = this.request.apply(this, arguments);
 			promises.resolve();
@@ -82,13 +106,8 @@ var XDomainMessageClient = (function (window) {
 			}
 			return RSVP.all( promises );
 		};
-		window.addEventListener("message", function (event) {
-			if (event.data.id) {
-				messages[event.data.id].resolve(event.data.body);
-				delete messages[event.data.id];
-			}
-		}, false);
 	};
+
 	return XDomainMessageClient;
 }(window));
 
@@ -125,7 +144,8 @@ var XDomainMessageServer = (function () {
 var tap = (function(){
 	var isReady, readyCbs = [];
 	var head = document.head || document.getElementsByTagName('head')[0];
-	var clients = {};	
+	var clients = {requiresInit: true};
+	var loadedUrls = {};
 	var injectScript = function( text ) {
 		var script = document.createElement('script');
 		//script.defer = true;
@@ -134,50 +154,97 @@ var tap = (function(){
 		script.text = text;
 		head.appendChild( script );
 	};
+	var bodyListener = function (evt) {
+		if(evt.relatedNode.tagName === 'BODY'){
+			document.removeEventListener("DOMNodeInserted", bodyListener);
+			tap.init();
+		}
+	};
+	
+	document.addEventListener("DOMNodeInserted", bodyListener); 
+
 	var toArray = function(nodelist){
 		return Array.prototype.slice.call(nodelist, 0);
 	};
+
+	var uid = 0;
+
 	return {
+		findRepo: function (url) {
+			var id;
+			// when we are here, all have sent back what they have...
+			if (clients.requiresInit) {
+				delete clients.requiresInit;
+			}
+			for (id in clients) {
+				if (clients[id].contents[url]) {
+					console.log('loading ' + url + ' from ' + id);
+					return clients[id];
+				}
+			}
+			console.log('loading ' + url + ' from ' + id);
+			return clients[id]; // Here we will want to consult
+		},
 		setRepo: function (id, url) {
 			clients[id] = new XDomainMessageClient(url);
-		}, 
+			clients[id].id = id;
+			return clients[id].readyPromise;
+		},
 		init: function () {
 			var toGet = [];
-			var clients = toArray(head.querySelectorAll("meta[name='tap-repository']"));
+			var clients = toArray(head.querySelectorAll("link[type='application/x-script-store']"));
 			var stuff = toArray(head.querySelectorAll("[data-tap-get]"));
-			
+			var promises = [];
+
 			clients.forEach(function (el) {
-				var id = el.getAttribute("data-id") || "default";
-				tap.setRepo(id, el.getAttribute("content"));
+				var id = el.getAttribute("data-id") || ++uid;
+				promises.push(tap.setRepo(id, el.getAttribute("href")));
 			});
+
 			stuff.forEach(function(el){
 				toGet.push({ "url": el.getAttribute("data-tap-get") });
 			});
-			this.get(toGet).then(function () {
-				isReady = true;
-				readyCbs.forEach(function (callback) {
-					callback();
+
+			var self = this;
+			RSVP.all(promises).then(function () { 
+				self.get(toGet).then(function () {
+					isReady = true;
+					readyCbs.forEach(function (callback) {
+						callback();
+					});
 				});
 			});
-		}, 
+		},
 		get: function (clientId, o) {
-			var id = (arguments.length>1) ? clientId : "default";
+			var id = (arguments.length>1) ? clientId : "0";
 			var req = (arguments.length>1) ? o : arguments[0];
-			client = clients[id];
-			return client.request(req).then(function (x) {
-				x = x[0];
-				for (var i=0;i<x.length;i++) {
-					injectScript(x[i]);
+			var client = clients[id];
+			var promises = [];
+			if (arguments.length === 1) {
+				for (var i=0;i<req.length;i++) {
+					promises.push(this.findRepo(req[i].url).request(req[i]));
 				}
-			});		
-		}, 
-		ready: function (cb) {
-			if (isReady) { 
-				cb(); 
+				return RSVP.all(promises).then(function (x) {
+					x = x[0];
+					for (var i=0;i<x.length;i++) {
+						injectScript(x[i]);
+					}
+				});
 			} else {
-				readyCbs.push(cb);	
+				return client.request(req).then(function (x) {
+					x = x[0];
+					for (var i=0;i<x.length;i++) {
+						injectScript(x[i]);
+					}
+				});
+			}
+		},
+		ready: function (cb) {
+			if (isReady) {
+				cb();
+			} else {
+				readyCbs.push(cb);
 			}
 		}
-	}		
+	}
 }());
-tap.init();

@@ -4,31 +4,39 @@
     <<content>>
 
     <script>
-      var lazy = <<lazy>>;
-      
-     function lazyLoad(){
-        var next = lazy.shift();
+      var libs = <<libs>>;
+      var contents = {};
+
+      for(var i=0;i<libs.length;i++){
+        contents[libs[i].replace('libs/','')] = basket.get(libs[i]) !== false;
+      }
+
+      function lazyLoad(){
+        var next = libs.shift();
         if (next) {
           if(basket.get(next)){
             lazyLoad();
           } else {
-            setTimeout(
-              function () {
-                basket.require({"url": next, execute: false}).then(function() {
-                  lazyLoad();
-                });
-              },
-              <<speed>>
-            )
-        }
+              console.log("lazy loading from #2" + next);
+              setTimeout(
+                function () {
+                  basket.require({"url": next, execute: false}).then(function() {
+                    lazyLoad();
+                  });
+                },
+                <<speed>>
+              )
+          }
         } else {
-          // console.log("repo all loaded...");
+            console.log("repo all loaded...");
         }
       }
 
-      lazyLoad();
+      if (<<lazy>>) {
+        lazyLoad();
+      }
   </script>
-  </head> 
+  </head>
   <body>
   </body>
 </html>

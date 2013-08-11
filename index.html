@@ -2,22 +2,24 @@
 <html><head>
 	<meta charset="utf-8">
 	<title>tap.js - A simple (proof-of-concept) script loader using x-domain localStorage: APT-repository-style.</title>
-	<link rel="stylesheet" href="css/base.css">
-		<!-- Let the world know about a repository ... -->
-  	<meta name="tap-repository" content="http://bkardell.github.io/tap/repository.html">
 
-	<!-- What do you want to load out of the repository? --> 
+	<!-- Include tap ... Anywhere in the head is just fine... -->
+	<script type="application/javascript" src="dist/tap.js"></script>
+
+	<link rel="stylesheet" href="css/base.css">
+
+	<!-- Let the world know about a repository ... -->
+  	<link rel="import" type="application/x-script-store" href="repository.html">
+  	<link rel="import" type="application/x-script-store" href="http://127.0.0.1/~bkardell/tap/repository-b.html" data-id="foo">
+
+	<!-- What do you want to load out of the repository? -->
 	<script data-tap-get="hitch-0.6.3-min.js"></script>
 	<script data-tap-get="jquery-1.10.2.min.js"></script>
-
-	<!-- Include tap ... -->
-	<script type="application/javascript" src="dist/tap.js"></script>
-	
 
 	<!-- Wanna know when scripts are ready? -->
 	<script>
 		tap.ready(function(){
-			document.getElementById("test").value = 
+			document.getElementById("test").value =
 			  "All my files loaded... Anyone using this repo shouldnt have to fetch again..."
 			  "\nhitch: " + Hitch
 			  "\nJQuery: " + $;
@@ -46,7 +48,7 @@
 
 
 
-  
+
 <h3>How is this related to basket.js?</h3>
 
 <p>Great question, I'm glad you asked.  Actually, it extends Addy Osmani's <a href="https://github.com/addyosmani/basket.js">basket.js</a> (which was in turn created as a response to a tweeted suggestion by Steve Souders).  They have a cool and informative site - if the localStorage bit seems unusual, give it a read.</p>
@@ -104,7 +106,7 @@
 
 <div class="highlight"><pre><span class="nt">&lt;script&gt;</span>
     <span class="nx">tap</span><span class="p">.</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
-        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"test"</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span> 
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"test"</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span>
             <span class="s2">"All my files loaded... Anyone using this repo shouldnt have to fetch again..."</span>
             <span class="s2">"\nhitch: "</span> <span class="o">+</span> <span class="nx">Hitch</span>
             <span class="s2">"\nJQuery: "</span> <span class="o">+</span> <span class="nx">$</span><span class="p">;</span>
@@ -118,7 +120,6 @@
 
 <p>To free space basket.js will only remove cached scripts that it placed in localStorage itself. The data stored by other code in same origin will not be touched.</p>
 
-<hr />
 <h2>Can I create a Repo?</h2>
 
 
@@ -152,9 +153,9 @@
 
 			</div>
 		</div>
-		
-		
+
+
 		<a href="http://github.com/bkardell/tap"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-	
+
 
 </body></html>
