@@ -28,7 +28,7 @@ if (process.argv.length>3) {
 	lazySpeed = (isNaN(temp)) ? lazySpeed : temp;
 }
 
-templ = templ.replace("<<lazy>>", JSON.stringify(preload)).replace("<<speed>>", lazySpeed);
+templ = templ.replace("<<libs>>", JSON.stringify(preload)).replace("<<speed>>", lazySpeed).replace("<<lazy>>", preload.length > 0);
 
 fs.writeFileSync(
 	"repository.html",

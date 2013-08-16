@@ -372,7 +372,7 @@ XDomainMessageServer.receive(function(event, res){
 </script>
 
     <script>
-      var libs = <<libs>>;
+      var libs = ["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"];
       var contents = {};
 
       for(var i=0;i<libs.length;i++){
@@ -400,7 +400,7 @@ XDomainMessageServer.receive(function(event, res){
         }
       }
 
-      if (["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"]) {
+      if (true) {
         lazyLoad();
       }
   </script>
