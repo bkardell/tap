@@ -3,18 +3,22 @@
 	<meta charset="utf-8">
 	<title>tap.js - A simple (proof-of-concept) script loader using x-domain localStorage: APT-repository-style.</title>
 
-	<!-- Include tap ... Anywhere in the head is just fine... -->
-	<script type="application/javascript" src="dist/tap.js"></script>
 
 	<link rel="stylesheet" href="css/base.css">
 
 	<!-- Let the world know about a repository ... -->
   	<link rel="import" type="application/x-script-store" href="repository.html">
-  	<link rel="import" type="application/x-script-store" href="http://127.0.0.1/~bkardell/tap/repository-b.html" data-id="foo">
+
+  	<!-- Or maybe two...
+  	<link rel="import" type="application/x-script-store" href="http:/exampleb/repository-b.html" data-id="foo">
+    -->
 
 	<!-- What do you want to load out of the repository? -->
 	<script data-tap-get="hitch-0.6.3-min.js"></script>
 	<script data-tap-get="jquery-1.10.2.min.js"></script>
+
+	<!-- Include tap ... Anywhere after gets/imports is just fine... -->
+	<script type="application/javascript" src="dist/tap.js"></script>
 
 	<!-- Wanna know when scripts are ready? -->
 	<script>

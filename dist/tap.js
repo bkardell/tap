@@ -154,14 +154,6 @@ var tap = (function(){
 		script.text = text;
 		head.appendChild( script );
 	};
-	var bodyListener = function (evt) {
-		if(evt.relatedNode.tagName === 'BODY'){
-			document.removeEventListener("DOMNodeInserted", bodyListener);
-			tap.init();
-		}
-	};
-	
-	document.addEventListener("DOMNodeInserted", bodyListener); 
 
 	var toArray = function(nodelist){
 		return Array.prototype.slice.call(nodelist, 0);
@@ -206,7 +198,7 @@ var tap = (function(){
 			});
 
 			var self = this;
-			RSVP.all(promises).then(function () { 
+			RSVP.all(promises).then(function () {
 				self.get(toGet).then(function () {
 					isReady = true;
 					readyCbs.forEach(function (callback) {
@@ -248,3 +240,4 @@ var tap = (function(){
 		}
 	}
 }());
+tap.init();

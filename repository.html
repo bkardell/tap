@@ -353,7 +353,7 @@ var XDomainMessageServer = (function () {
 		})( this, document );
 
 
-XDomainMessageServer.receive(function (event, res) {
+XDomainMessageServer.receive(function(event, res){
     var promise;
     if (event.data.cmd) {
         res.send(contents);
@@ -372,7 +372,7 @@ XDomainMessageServer.receive(function (event, res) {
 </script>
 
     <script>
-      var libs = ["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"];
+      var libs = <<libs>>;
       var contents = {};
 
       for(var i=0;i<libs.length;i++){
@@ -392,7 +392,7 @@ XDomainMessageServer.receive(function (event, res) {
                     lazyLoad();
                   });
                 },
-                10000
+                15000
               )
           }
         } else {
@@ -400,7 +400,7 @@ XDomainMessageServer.receive(function (event, res) {
         }
       }
 
-      if (true) {
+      if (["libs/ember-1.0.0-rc.6.min.js","libs/hitch-0.6.3-min.js","libs/jquery-1.10.2.min.js"]) {
         lazyLoad();
       }
   </script>
